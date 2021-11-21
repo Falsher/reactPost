@@ -56,7 +56,7 @@ function App() {
         {sortedAndSaerchTodo.length !== 0 ? (
           <TodoList remove={removetodoPost} todoList={sortedAndSaerchTodo} />
         ) : (
-          <p>not todo</p>
+          <p>not todo!!</p>
         )}
       </div>
       {pagesArray.map(p => (
