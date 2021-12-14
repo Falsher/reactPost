@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 import FormUpdateListUsers from "./components/FormUpdateListUsers";
 
-import MyInput from "./components/MyInput";
-import Select from "./components/select";
+import PostFilter from "./components/PostFilter";
+
 import TitleListUsers from "./components/TitleListUsers";
 function App() {
   const [users, setUsers] = useState([
@@ -11,23 +11,22 @@ function App() {
     { id: 3, name: "Ivan", spesials: "front-end" },
     { id: 4, name: "Jissel", spesials: "vokal" },
   ]);
-  const [selectedSort, setSelectedSort] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
 
+  const [filter, setFilter] = useState({ sort: "", query: "" });
   const sortedUsers = useMemo(() => {
-    if (selectedSort) {
+    if (filter.sort) {
       return [...users].sort((a, b) =>
-        a[selectedSort].localeCompare(b[selectedSort])
+        a[filter.sort].localeCompare(b[filter.sort])
       );
     }
     return users;
-  }, [selectedSort, users]);
+  }, [filter.sort, users]);
 
   const sortedAndSearchUsers = useMemo(() => {
     return sortedUsers.filter((sortedUser) =>
-      sortedUser.toLowerCase().name.includes(searchQuery)
+      sortedUser.name.toLowerCase().includes(filter.query.toLowerCase())
     );
-  }, [searchQuery, sortedUsers]);
+  }, [filter.query, sortedUsers]);
 
   const createUsers = (newUserInList) => {
     setUsers([...users, newUserInList]);
@@ -35,32 +34,13 @@ function App() {
   const removeUser = (user) => {
     setUsers(users.filter((us) => us.id !== user.id));
   };
-  const sortUsers = (sort) => {
-    setSelectedSort(sort);
-  };
 
   return (
     <div className="container-lg">
       <div className="row">
         <FormUpdateListUsers create={createUsers} />
-        <div>
-          <MyInput
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="form-control mt-3"
-            placeholder="поиск"
-          />
-        </div>
-
-        <Select
-          value={selectedSort}
-          onChange={sortUsers}
-          options={[
-            { value: "spesials", name: "по специальности" },
-            { value: "name", name: "по имени" },
-          ]}
-        />
-        {users.length ? (
+        <PostFilter filter={filter} setFilter={setFilter} />
+        {sortedAndSearchUsers.length ? (
           <TitleListUsers
             removeUser={removeUser}
             users={sortedAndSearchUsers}
