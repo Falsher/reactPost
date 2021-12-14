@@ -25,7 +25,7 @@ function App() {
 
   const sortedAndSearchUsers = useMemo(() => {
     return sortedUsers.filter((sortedUser) =>
-      sortedUser.name.includes(searchQuery)
+      sortedUser.toLowerCase().name.includes(searchQuery)
     );
   }, [searchQuery, sortedUsers]);
 
