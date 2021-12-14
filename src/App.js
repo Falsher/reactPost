@@ -1,69 +1,77 @@
-import React, { useEffect, useState } from 'react';
-import PostTodo from './components/postTodo';
-import Counter from './components/counter';
-import TodoList from './components/todoList';
-import MyModal from './components/MyModal';
-import PostFilter from './components/PostFilter';
-import MyButton from './components/myButton';
-import { usePosts } from './hooks/usePosts';
-import PostService from './components/API/PostService';
-import { getPageCount, getPagesArray } from './components/utils/pages';
+import React, { useMemo, useState } from "react";
+import FormUpdateListUsers from "./components/FormUpdateListUsers";
 
+import MyInput from "./components/MyInput";
+import Select from "./components/select";
+import TitleListUsers from "./components/TitleListUsers";
 function App() {
-  const [todoList, setTodoList] = useState([]);
+  const [users, setUsers] = useState([
+    { id: 1, name: "Vlad", spesials: "manager" },
+    { id: 2, name: "Givi", spesials: "docktor" },
+    { id: 3, name: "Ivan", spesials: "front-end" },
+    { id: 4, name: "Jissel", spesials: "vokal" },
+  ]);
+  const [selectedSort, setSelectedSort] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const [filter, setFilter] = useState({ sort: '', query: '' });
+  const sortedUsers = useMemo(() => {
+    if (selectedSort) {
+      return [...users].sort((a, b) =>
+        a[selectedSort].localeCompare(b[selectedSort])
+      );
+    }
+    return users;
+  }, [selectedSort, users]);
 
-  const [limit, setLimit] = useState(10);
-  const [totalPage, setTotalPage] = useState(0);
-  const [page, setPage] = useState(1);
-  const [modal, setModal] = useState(false);
-  const sortedAndSaerchTodo = usePosts(todoList, filter.sort, filter.query);
-  const createTodo = newTodo => {
-    setTodoList([...todoList, newTodo]);
+  const sortedAndSearchUsers = useMemo(() => {
+    return sortedUsers.filter((sortedUser) =>
+      sortedUser.name.includes(searchQuery)
+    );
+  }, [searchQuery, sortedUsers]);
+
+  const createUsers = (newUserInList) => {
+    setUsers([...users, newUserInList]);
   };
-  const changePage = page => {
-    setPage(page);
+  const removeUser = (user) => {
+    setUsers(users.filter((us) => us.id !== user.id));
   };
-  const removetodoPost = todo => {
-    setTodoList(todoList.filter(todolis => todolis.id !== todo.id));
+  const sortUsers = (sort) => {
+    setSelectedSort(sort);
   };
-  let pagesArray = getPagesArray(totalPage);
-  useEffect(() => {
-    fetchPosts();
-  }, [page]);
-  async function fetchPosts() {
-    const response = await PostService.getAll(limit, page);
-    setTodoList(response.data);
-    const totalCount = response.headers['x-total-count'];
-    setTotalPage(getPageCount(totalCount, limit));
-  }
+
   return (
-    <div>
-      <MyModal visible={modal} setVisible={setModal}>
-        <PostTodo create={createTodo} />
-      </MyModal>
-      <hr />
-      <MyButton onClick={fetchPosts}>Добавить список API todo</MyButton>
-      <hr />
-      <Counter />
-      <hr />
-      <MyButton onClick={() => setModal(true)}>Добавить todo</MyButton>
-      <hr />
-      <PostFilter filter={filter} setFilter={setFilter} />
+    <div className="container-lg">
+      <div className="row">
+        <FormUpdateListUsers create={createUsers} />
+        <div>
+          <MyInput
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="form-control mt-3"
+            placeholder="поиск"
+          />
+        </div>
 
-      <div>
-        {sortedAndSaerchTodo.length !== 0 ? (
-          <TodoList remove={removetodoPost} todoList={sortedAndSaerchTodo} />
+        <Select
+          value={selectedSort}
+          onChange={sortUsers}
+          options={[
+            { value: "spesials", name: "по специальности" },
+            { value: "name", name: "по имени" },
+          ]}
+        />
+        {users.length ? (
+          <TitleListUsers
+            removeUser={removeUser}
+            users={sortedAndSearchUsers}
+            title="List Users"
+          />
         ) : (
-          <p>not todo!!!</p>
+          <div>
+            <h2>No Users</h2>
+          </div>
         )}
       </div>
-      {pagesArray.map(p => (
-        <MyButton key={p} onClick={() => changePage(p)}>
-          {p}
-        </MyButton>
-      ))}
     </div>
   );
 }
