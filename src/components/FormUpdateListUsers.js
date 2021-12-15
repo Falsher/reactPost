@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import MyButton from "./MyButton";
 import MyInput from "./MyInput";
 const FormUpdateListUsers = ({ create }) => {
-  const [newUser, setNewUser] = useState({ name: "", spesials: "" });
-  //   const [spesialInput, setSpesialInput] = useState("");
+  const [newUser, setNewUser] = useState({ title: "", body: "" });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newUserInList = {
@@ -11,24 +11,24 @@ const FormUpdateListUsers = ({ create }) => {
       id: Date.now(),
     };
     create(newUserInList);
-    setNewUser({ name: "", spesials: "" });
+    setNewUser({ title: "", body: "" });
   };
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-3">
-        <label className="form-label">Name</label>
+        <label className="form-label">title</label>
         <MyInput
           value={newUser.name}
-          onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+          onChange={(e) => setNewUser({ ...newUser, title: e.target.value })}
           type="text"
           className="form-control"
         />
       </div>
       <div className="mb-3">
-        <label className="form-label">Spesials</label>
+        <label className="form-label">body</label>
         <MyInput
           value={newUser.spesials}
-          onChange={(e) => setNewUser({ ...newUser, spesials: e.target.value })}
+          onChange={(e) => setNewUser({ ...newUser, body: e.target.value })}
           type="text"
           className="form-control"
         />

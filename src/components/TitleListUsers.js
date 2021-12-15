@@ -1,12 +1,18 @@
 import React from "react";
+import "../App.css";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 import UserList from "./UserList";
-const TitleListUsers = ({ users, title, removeUser }) => {
+const TitleListUsers = ({ posts, title, removeUser }) => {
   return (
     <div>
       <h1 className="text-center">{title}</h1>
-      {users.map((user) => (
-        <UserList removeUser={removeUser} user={user} key={user.id} />
-      ))}
+      <TransitionGroup>
+        {posts.map((user) => (
+          <CSSTransition key={user.id} timeout={500} classNames="post">
+            <UserList removeUser={removeUser} user={user} />
+          </CSSTransition>
+        ))}
+      </TransitionGroup>
     </div>
   );
 };

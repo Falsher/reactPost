@@ -17,8 +17,8 @@ const PostFilter = ({ filter, setFilter }) => {
           setFilter({ ...filter, sort: selectedSort })
         }
         options={[
-          { value: "spesials", name: "по специальности" },
-          { value: "name", name: "по имени" },
+          { value: "title", name: "По названию" },
+          { value: "body", name: "По описанию" },
         ]}
       />
     </div>

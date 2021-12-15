@@ -1,49 +1,60 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormUpdateListUsers from "./components/FormUpdateListUsers";
-
+import MyButton from "./components/MyButton";
+import MyModal from "./components/MyModal/MyModal";
 import PostFilter from "./components/PostFilter";
-
 import TitleListUsers from "./components/TitleListUsers";
+import { getPagesCount } from "./components/pages";
+import { getPagesArray } from "./components/pages";
+import { useUsers } from "./hooks/useUsers";
+import { GetAll } from "./API/GetAll";
 function App() {
-  const [users, setUsers] = useState([
-    { id: 1, name: "Vlad", spesials: "manager" },
-    { id: 2, name: "Givi", spesials: "docktor" },
-    { id: 3, name: "Ivan", spesials: "front-end" },
-    { id: 4, name: "Jissel", spesials: "vokal" },
-  ]);
-
+  const [posts, setUsers] = useState([]);
+  const [modal, setModal] = useState(false);
   const [filter, setFilter] = useState({ sort: "", query: "" });
-  const sortedUsers = useMemo(() => {
-    if (filter.sort) {
-      return [...users].sort((a, b) =>
-        a[filter.sort].localeCompare(b[filter.sort])
-      );
-    }
-    return users;
-  }, [filter.sort, users]);
-
-  const sortedAndSearchUsers = useMemo(() => {
-    return sortedUsers.filter((sortedUser) =>
-      sortedUser.name.toLowerCase().includes(filter.query.toLowerCase())
-    );
-  }, [filter.query, sortedUsers]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const [page, setPage] = useState(1);
+  const sortedAndSearchUsers = useUsers(posts, filter.sort, filter.query);
+  const pagesArray = getPagesArray(totalPages);
 
   const createUsers = (newUserInList) => {
-    setUsers([...users, newUserInList]);
+    setUsers([...posts, newUserInList]);
+    setModal(false);
   };
-  const removeUser = (user) => {
-    setUsers(users.filter((us) => us.id !== user.id));
-  };
+  async function fetchPosts() {
+    const response = await GetAll(limit, page);
+    setUsers(response.data);
+    const totalCount = response.headers["x-total-count"];
 
+    setTotalPages(getPagesCount(totalCount, limit));
+  }
+  useEffect(() => {
+    fetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  const removeUser = (user) => {
+    setUsers(posts.filter((us) => us.id !== user.id));
+  };
+  const changePage = (page) => {
+    setPage(page);
+  };
   return (
     <div className="container-lg">
       <div className="row">
-        <FormUpdateListUsers create={createUsers} />
+        <MyButton onClick={() => setModal(true)} btn={"Добавить человека"} />
+        <MyModal visible={modal} setVisible={setModal}>
+          <FormUpdateListUsers create={createUsers} />
+        </MyModal>
+        <hr className="mt-5" />
+
         <PostFilter filter={filter} setFilter={setFilter} />
+
         {sortedAndSearchUsers.length ? (
           <TitleListUsers
             removeUser={removeUser}
-            users={sortedAndSearchUsers}
+            posts={sortedAndSearchUsers}
             title="List Users"
           />
         ) : (
@@ -51,6 +62,11 @@ function App() {
             <h2>No Users</h2>
           </div>
         )}
+      </div>
+      <div className="d-flex m-2 ">
+        {pagesArray.map((page) => (
+          <MyButton onClick={() => changePage(page)} key={page} btn={page} />
+        ))}
       </div>
     </div>
   );
